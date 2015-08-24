@@ -1,0 +1,72 @@
+#!/usr/bin/python3
+import sys
+import subprocess
+import xml.sax
+import getpass
+
+componentList = []
+
+class Component:
+    name = ""
+    install = ""
+    location = ""
+
+    def __init__(self, name, isInstall, location):
+        self.name = name
+        self.install = isInstall
+        self.location = location
+
+    def __str__(self):
+        return "Component. Name: " + self.name + "; Is install: " + self.install + "; Location: " + self.location
+
+class ConfigHandler(xml.sax.handler.ContentHandler):
+
+    def startElement(self, name, attrs):
+        if name == r"item":
+            name = attrs.getValue(r"name")
+            install = attrs.getValue(r"install")
+            location = attrs.getValue("location")
+            global componentList
+            componentList.append(Component(name, install, location))
+
+def scrypt_exit(code):
+    print(r"Script finished.")
+    exit(code)
+
+xml.sax.parse(r"config.xml", ConfigHandler())
+
+def installToStr(inst):
+    if inst == "yes":
+        return "install"
+    else:
+        return "not install"
+
+print("Configuration parameters:")
+for comp in componentList:
+    print("  ", comp.name, " - ", installToStr(comp.install))
+
+answer = input("Would you like to continue? (yes/no) : ")
+if not(answer.lower() == "yes"):
+    print("**Installation terminated by user.**")
+    scrypt_exit(1)
+else:
+    server_addr = input("Enter server address: ")
+    server_user = input("Enter server user: ")
+    server_pass = getpass.getpass("Enter server pass: ")
+    for comp in componentList:
+        if comp.install == "yes":
+             print("============================================")
+             print("Install a component: ", comp.name)
+             try:
+                 result = subprocess.call([comp.location + "/install", 
+                     server_addr, server_user, server_pass])
+             except OSError as err:
+                 result = 1
+                 print("OS Error: {0}".format(err))
+             if (result == 0):
+                 print("Component installed success.")
+             else:
+                 print("Component installation finished with ERRORS!")
+             print("============================================")
+
+scrypt_exit(0)

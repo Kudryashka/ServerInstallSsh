@@ -1,0 +1,3 @@
+Java v.7
+Entities from 'Java' folder should be placed to 'bundle' folder.
+Not placed yet for fast repository loading from GitHub.

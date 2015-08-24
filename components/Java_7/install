@@ -1,0 +1,38 @@
+#!/usr/bin/python3
+import sys
+import subprocess
+
+INSTALL_LOCATION = r"/usr/local/lib/"
+SYM_LINK_LOCATION = r"/usr/local/bin/"
+path_tuple = sys.argv[0].rpartition(r"/")
+BUNDLE_FULL_PATH = path_tuple[0] + path_tuple[1] + "bundle"
+
+server_addr = sys.argv[1]
+server_usr = sys.argv[2]
+server_pass = sys.argv[3]
+
+print("Server address:", server_addr)
+print("User name:", server_usr)
+print("Install location:", INSTALL_LOCATION)
+
+try:
+    result = subprocess.call(["sshpass", "-p", server_pass, 
+        "scp", "-r", BUNDLE_FULL_PATH,
+        server_usr + "@" + server_addr + ":" +  INSTALL_LOCATION + "java7"])
+    if result != 0:
+        raise OSError("Fail to transfer installation bundle to remote server.")
+    print("Component bundle transfered to remote server.")
+    result = subprocess.call(["sshpass", "-p", server_pass, 
+        "ssh", server_usr + "@" + server_addr, 
+        "ln -s " + INSTALL_LOCATION + "java7/bin/java " + 
+            SYM_LINK_LOCATION + "java"])
+    print("Symbolic link to JAVA successfully created.")
+    if result != 0:
+        raise OSError("Fail to create symbolic link to Java.")
+except OSError as err:
+    print("OS Error: {0}".format(err))
+    print("Installation fail.")
+    exit(1)
+
+print("Java v.7. Successfully installed.")
+exit(0)
