@@ -1,0 +1,43 @@
+#!/usr/bin/python3
+import sys
+import subprocess
+import os
+
+path_tuple = sys.argv[0].rpartition("/")
+
+SYS_VAR_FILE = "/etc/environment"
+TMP_VAR_FILE = "{0}{1}TMP_VAR_FILE".format(path_tuple[0], path_tuple[1])
+
+server_addr = sys.argv[1]
+server_usr = sys.argv[2]
+server_pass = sys.argv[3]
+
+sysvar_name = sys.argv[4]
+sysvar_value = sys.argv[5]
+
+print("Try to install system variable '{0}' with value: {1}".format(sysvar_name, sysvar_value))
+print("System variable file: {0}".format(SYS_VAR_FILE))
+
+try:
+    print("Download system variable file from remote machine.")
+    result = subprocess.call(["sshpass", "-p", server_pass, 
+        "scp", "{0}@{1}:{2}".format(server_usr, server_addr, SYS_VAR_FILE), TMP_VAR_FILE])
+    if result != 0:
+        raise OSError("Fail to download file from remote machine")
+    print("Update system variable file.")
+    with open(TMP_VAR_FILE, 'a') as f:
+        f.write("\n{0}={1}".format(sysvar_name, sysvar_value))
+    print("Transfer system variable file to remote machine.")
+    result = subprocess.call(["sshpass", "-p", server_pass,
+        "scp", TMP_VAR_FILE, "{0}@{1}:{2}".format(server_usr, server_addr, SYS_VAR_FILE)])
+    if result != 0:
+        raise OSError("Fail to transfer file to remote machine")
+    print("Delete temporary file.")
+    os.unlink(TMP_VAR_FILE)
+except OSError as err:
+    print("OS Error: {0}".format(err))
+    print("Fail to install system variable.")
+    exit(1)
+
+print("Variable installation success.")
+exit(0)

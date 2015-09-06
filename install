@@ -64,7 +64,7 @@ else:
                  result = 1
                  print("OS Error: {0}".format(err))
              if (result == 0):
-                 print("Component installed success.")
+                 print("Component installation success.")
              else:
                  print("Component installation finished with ERRORS!")
              print("============================================")

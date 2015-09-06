@@ -20,19 +20,19 @@ try:
     print("Transfer installation bundle to remote server.")
     result = subprocess.call(["sshpass", "-p", server_pass, 
         "scp", "-r", BUNDLE_FULL_PATH,
-        server_usr + "@" + server_addr + ":" +  INSTALL_LOCATION + "java7"])
+        server_usr + "@" + server_addr + ":" +  INSTALL_LOCATION + "java8"])
     if result != 0:
         raise OSError("Fail to transfer installation bundle to remote server.")
     print("Create symbolyc link to Java executable file.")
     result = subprocess.call(["sshpass", "-p", server_pass, 
         "ssh", server_usr + "@" + server_addr, 
-        "ln -s " + INSTALL_LOCATION + "java7/bin/java " + 
+        "ln -s " + INSTALL_LOCATION + "java8/bin/java " + 
             SYM_LINK_LOCATION + "java"])
     if result != 0:
         raise OSError("Fail to create symbolic link to Java.")
     print("Update system variables.")
     result = subprocess.call([UTILS + "sysvar_update", server_addr, server_usr, server_pass, 
-        "JAVA_HOME", INSTALL_LOCATION + "java7"])
+        "JAVA_HOME", INSTALL_LOCATION + "java8"])
     if result != 0:
         raise OSError("Fail to update system variables.")
 except OSError as err:
@@ -40,7 +40,7 @@ except OSError as err:
     print("Installation fail.")
     exit(1)
 
-print("Java v.7. Successfully installed.")
+print("Java v.8. Successfully installed.")
 print("Remote machine should be rebooted to apply some chenges.")
 input("Reboot remote machine and press 'Enter' to continue.")
 exit(0)
