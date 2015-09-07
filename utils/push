@@ -19,6 +19,7 @@ Util to push content to remote machine.
     local_path  - path to content on local machine
     remote_path - path to content on remote machine
 """.format(PATH_TUPLE[2]))
+    exit(0)
 
 server_addr = sys.argv[1]
 server_usr = sys.argv[2]
