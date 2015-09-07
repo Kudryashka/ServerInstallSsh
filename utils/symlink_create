@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+import sys
+import subprocess
+
+PATH_TUPLE = sys.argv[0].rpartition("/")
+
+if len(sys.argv) == 1:
+    print("""\
+
+********************************
+Util for symbolic link creation.
+********************************
+  Use with follow format:
+    {} <server_addr> <server_user> <server_pass> <link_target> <link_name>
+  where
+    server_addr - remote server address
+    server_user - remote server user
+    server_pass - remote server password
+    link_target - target file to be linked
+    link_name   - link name (with path to link)
+""".format(PATH_TUPLE[2]))
+    exit(0)
+
+server_addr = sys.argv[1]
+server_usr = sys.argv[2]
+server_pass = sys.argv[3]
+
+link_target = sys.argv[4]
+link_name = sys.argv[5]
+
+try:
+    print("Try to create symbolic link {} to {}".format(link_name, link_target))
+    result = subprocess.call(["sshpass", "-p", server_pass,
+        "ssh", "{user}@{addr}".format(user=server_usr, addr=server_addr),
+        "ln -sf {target} {name}".format(target=link_target, name=link_name)])
+    if result != 0:
+        raise OSError("Fail result from system command. Result: {}".format(result))
+except OSError as err:
+    print("OS Error: {}".format(err))
+    print("Fail to create symbolik link.")
+    exit(1)
+
+print("Symbolic link successfully created.")
+exit(0)
