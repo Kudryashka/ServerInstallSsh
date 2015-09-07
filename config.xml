@@ -1,7 +1,8 @@
 <components>
   <item name='Java v.7' install='no' location='components/Java_7'/>
-  <item name='Java v.8' install='yes' location='components/Java_8'/>
-  <item name='Tomcat v.8' install='no' location='components/Tomcat_8'>
+  <item name='Java v.8' install='no' location='components/Java_8'/>
+  <item name='Tomcat v.8' install='yes' location='components/Tomcat_8'>
+    <!-- GCC or another C compiler needed -->
     <!-- Java v.7 or later needed -->
   </item>
 </components>

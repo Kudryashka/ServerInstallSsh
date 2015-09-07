@@ -1,0 +1,64 @@
+#!/usr/bin/python3
+import sys
+import subprocess
+
+PATH_TUPLE = sys.argv[0].rpartition("/")
+UTILS = "{}/../../utils/".format(PATH_TUPLE[0])
+
+INSTALL_LOCATION = "/usr/local/lib/tomcat8"
+BUNDLE_PATH = "{}{}bundle".format(PATH_TUPLE[0], PATH_TUPLE[1])
+
+server_addr = sys.argv[1]
+server_usr = sys.argv[2]
+server_pass = sys.argv[3]
+
+print("Server address:", server_addr)
+print("User name:", server_usr)
+print("Install location:", INSTALL_LOCATION)
+
+try:
+    print("Transfer installation bundle to remote server.")
+    result = subprocess.call(["{}push".format(UTILS),
+        server_addr, server_usr, server_pass, BUNDLE_PATH, INSTALL_LOCATION])
+    if result != 0:
+        raise OSError("Fail to transfer installation bundle to remote server.")
+
+    print("Install 'CATALINA_HOME' system variable.")
+    result = subprocess.call(["{}sysvar_update".format(UTILS),
+        server_addr, server_usr, server_pass, "CATALINA_HOME", INSTALL_LOCATION])
+    if result != 0:
+        raise OSError("Fail to create system variable.")
+
+    input("Please reboot remote machine and press 'Enter' to continue.")
+
+    print("Build jsvc utils.")
+    result = subprocess.call(["{}command".format(UTILS),
+        server_addr, server_usr, server_pass, 
+        """\
+cd $CATALINA_HOME/bin &&
+tar xfz commons-daemon-native.tar.gz &&
+cd commons-daemon-1.0.15-native-src/unix &&
+./configure &&
+make &&
+cp jsvc ../..
+"""])
+    if result != 0:
+        raise OSError("Fail to build jsvc utils.")
+
+    #todo run on boot script
+    #todo run 
+
+#    print("Run server.")
+#    result = subprocess.call(["{}command".format(UTILS),
+#        server_addr, server_usr, server_pass, "cd $CATALINA_HOME;./bin/jsvc -classpath $CATALINA_HOME/bin/bootstrap.jar:$CATALINA_HOME/bin/tomcat-juli.jar -outfile $CATALINA_HOME/logs/catalina.out -errfile $CATALINA_HOME/logs/catalina.err -Dcatalina.home=$CATALINA_HOME -Dcatalina.base=$CATALINA_HOME -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -Djava.util.logging.config.file=$CATALINA_HOME/conf/logging.properties org.apache.catalina.startup.Bootstrap"])
+#    if result != 0:
+#        raise OSError("Fail to build jsvc utils.")
+
+
+except OSError as err:
+    print("OS Error: {}".format(err))
+    print("Installation fail.")
+    exit(1)
+
+print("Tomcat successfully installed.")
+exit(0)
