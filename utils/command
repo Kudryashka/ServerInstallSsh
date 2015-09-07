@@ -1,0 +1,41 @@
+#!/usr/bin/python3
+import sys
+import subprocess
+
+PATH_TUPLE = sys.argv[0].rpartition("/")
+
+if len(sys.argv) == 1:
+    print("""\
+******************************************
+Util to execute command on remote machine.
+******************************************
+  Use with follow format:
+    {} <server_addr> <server_user> <server_pass> <command>
+  where
+    server_addr - remote server address
+    server_user - remote server user
+    server_pass - remote server password
+    command     - command that should be executed on remote server
+""".format(PATH_TUPLE[2]))
+    exit(0)
+
+server_addr = sys.argv[1]
+server_usr = sys.argv[2]
+server_pass = sys.argv[3]
+
+command = sys.argv[4]
+
+print("Try to execute command.")
+
+try:
+    result = subprocess.call(["sshpass", "-p", server_pass,
+        "ssh", "{user}@{host}".format(user=server_usr, host=server_addr), command])
+    if result != 0:
+        raise OSError("Fail code received from system command. Result code: {}".format(result))
+except OSError as err:
+    print("OS Error: {}".format(err))
+    print("Fail to execute command.")
+    exit(1)
+
+print("Command successfully executed.")
+exit(0)
